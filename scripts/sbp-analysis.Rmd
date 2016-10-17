@@ -1,0 +1,138 @@
+---
+title: "Stacked Base Pairs"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 140)
+require(data.table)
+require(magrittr)
+require(tidyr)
+```
+
+Here, we have re-optimised the geometries for the stacked base pairs using Truhlar's M06-2X functional along with aug-cc-pVDZ in ethanol. Then CCSD(T)/aVDZ and MP2/(aug)-cc-pVXZ calculations, where X = D,T,Q, were run.
+
+```{r, include = FALSE}
+sbp_ccsdt <- read.csv(file = "~/GoogleDrive/srs-app/data/sbp-ccsdt-adz.edat", header = TRUE
+         , sep = "|", strip.white = TRUE) %>% data.table()
+
+sbp_mp2 <- read.csv(file = "~/GoogleDrive/srs-app/data/sbp-mp2.edat", header = TRUE
+                    , sep = "|", strip.white = TRUE) %>% data.table()
+
+sbp_ccsdt <- gather(sbp_ccsdt, En, value, CorrEn, Total)            # make super long
+sbp_mp2 <- gather(sbp_mp2, En, value, OS:RefEn)
+
+sbp_ccsdt[, value := 2625.5 * value]                                # convert to kJ/mol
+sbp_mp2[, value := 2625.5 * value]  
+
+sbp_ccsdt <- spread(sbp_ccsdt, Component, value) %>% data.table()   # widen by Component
+sbp_mp2 <- spread(sbp_mp2, Component, value) %>% data.table()
+
+# A-alone etc. not valid column names
+setnames(sbp_ccsdt, names(sbp_ccsdt), make.names(names(sbp_ccsdt)))
+setnames(sbp_mp2, names(sbp_mp2), make.names(names(sbp_mp2)))
+```
+
+
+After reading in our data, converting it to kJ/mol, etc. we calculate the counterpoise-corrected and non-counterpoise corrected values for both CCSD(T) and MP2, for all components. In particular, that means correlation energy (CorrEn) for CCSD(T), and OS and SS for MP2. 
+
+```{r, echo=TRUE}
+sbp_ccsdt[, nonCP := complex - A.alone - B.alone]                   # non-counterpoise corrected
+sbp_ccsdt[, CP := complex - A.ghostB - B.ghostA]                    # counterpoise corrected
+
+sbp_mp2[, nonCP := complex - A.alone - B.alone]
+sbp_mp2[, CP := complex - A.ghostB - B.ghostA]
+
+# print(sbp_ccsdt)
+# print(sbp_mp2)
+```
+
+
+```{r, include=FALSE}
+# back to original shape
+sbp_ccsdt <- gather(sbp_ccsdt, Component, value, A.alone:CP) %>%
+    spread(En, value) %>%
+    data.table()
+
+sbp_mp2 <- gather(sbp_mp2, Component, value, A.alone:CP) %>%
+    spread(En, value) %>%
+    data.table()
+```
+
+Then we merge CCSD(T)/aVDZ and MP2/aVDZ into `adz_both.cp` in order to determine the correction term. Note that counterpoise corrected energies were used!
+```{r}
+setkey(sbp_ccsdt, Suite, Method, Basis, System, Component)
+setkey(sbp_mp2, Suite, Method, Basis, System, Component)
+
+# merge CCSD(T) [CorrEn, Total] and MP2 [OS, SS, RefEn] data for aVDZ
+# this is for calculating the MP2 correction term for CCSD(T)
+# Note: all counterpoise corrected correlation energies (OS + SS)
+# should be 10 rows only!
+adz_both.cp <- merge(sbp_ccsdt[Component == "CP", !c("Basis", "Method"), with = F]
+                  , sbp_mp2[Basis == "adz" & Component == "CP", !c("Basis", "Method"), with = F]
+                  , by = c("Suite", "System", "Component"))
+# print(adz_both.cp)
+```
+
+After that, we calculate the MP2 correction, the difference between CCSD(T) and MP2 for the aug-cc-pVDZ basis set.
+
+```{r}
+adz_both.cp[, d_mp2 := CorrEn - OS - SS]
+
+print(adz_both.cp)
+```
+Hmm...the `d_mp2` values are all positive!
+
+```{r, include = FALSE}
+
+# to calculate MP2/CBS
+mp2_cbs <- gather(sbp_mp2, En, value, OS:RefEn) %>%
+    spread(Basis, value) %>%
+    data.table()
+```
+
+Then, we use the Helgaker extrapolation to calculate MP2/CBS:
+```{r}
+# ================ Helgaker extrapolation =============== #
+mp2_cbs[, cbs := (3^3 * atz - 4^3 * aqz) / (3^3 - 4^3)]
+```
+
+Following this, we are only interested in the counterpoise corrected MP2/CBS values for the OS and SS. So select only counterpoise corrected values, and collect the basis sets in a column, while spreading the original `OS`, `SS`, etc. out into columns.
+
+```{r}
+mp2_cbs <- gather(mp2_cbs[Component == "CP"], Basis, value, adz:cbs) %>%
+    spread(En, value) %>%
+    data.table()
+
+print(mp2_cbs)
+```
+
+Thus, we merge the MP2/CBS counterpoise corrected values with the MP2 correction term from `adz_both.cp`. Note that the **OS** and **SS** come from counterpoise corrected MP2 (for both aVDZ and CBS), and **`d_mp2`** comes from `CCSD(T)/aVDZ - MP2/aVDZ`, counterpoise corrected. Are my formulas correct?
+
+```{r}
+# note using "CBS" basis set, removing "old" and duplicate columns from adz_both.cp
+ccsdt_cbs <- merge(mp2_cbs[(Basis == "cbs" | Basis == "adz"), !c("Method", "Component"), with = F]
+                   , adz_both.cp[, !c("OS", "SS", "RefEn", "Component"), with = F], by = c("Suite", "System"))
+ccsdt_cbs[, ccsdt.cbs := OS + SS + d_mp2]
+
+print(ccsdt_cbs[order(Basis, System)])
+```
+
+Now, notice that I used both MP2/CBS and MP2/aVDZ. Here's the weird thing. Below are the old CCSD(T)/CBS results, along with the SRS/VTZ and VQZ that Dennis calculated. The aVDZ results above are much closer to the SRS results below! Whereas the new CBS results are rather high.
+
+```
+	ccsd(t)/cbs 	Eint(srs)/tz	Eint(srs)/qz
+AA	-52.01886741	-57.09531123	-57.13304834
+AC	-46.05043149	-48.30771951	-48.71215329
+AU	-42.66938187	-48.40978639	-48.78524818
+CC	-38.13748959	-37.28317451	-35.6200886
+CG	-40.28430518	-49.9374354	    -44.8954283
+CU	-37.50967724	-32.36791902	-33.08033109
+GA	-52.30441493	-56.62308196	-56.81254076
+GG	-53.99221117	-56.43450303	-56.5931341
+GU	-41.20755022	-45.9184363	    -43.39385213
+UU	-34.76382056	-34.11152255	-32.34332397
+```
+
+### _Any ideas what might be the problem?_
