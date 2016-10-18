@@ -145,17 +145,17 @@ adz_both.cp &lt;- merge(sbp_ccsdt[Component == &quot;CP&quot;, !c(&quot;Basis&qu
 <pre class="r"><code>adz_both.cp[, d_mp2 := CorrEn - OS - SS]
 
 print(adz_both.cp)</code></pre>
-<pre><code>##     Suite System Component    CorrEn     Total        OS        SS      RefEn     d_mp2
-##  1:   sbp     aa        CP -58.83831 -32.83461 -37.94211 -37.00656  26.003702 16.110351
-##  2:   sbp     ac        CP -48.02293 -42.47622 -28.61681 -30.94071   5.546704 11.534592
-##  3:   sbp     au        CP -49.22238 -35.00495 -29.07245 -30.49937  14.217433 10.349440
-##  4:   sbp     cc        CP -36.80766 -33.60944 -21.19335 -23.12212   3.198226  7.507807
-##  5:   sbp     cg        CP -42.01807 -54.77410 -22.86054 -26.58871 -12.756032  7.431174
-##  6:   sbp     cu        CP -38.36411 -45.99346 -19.35357 -24.59384  -7.629346  5.583298
-##  7:   sbp     ga        CP -60.29429 -45.43087 -37.44850 -38.28870  14.863428 15.442904
-##  8:   sbp     gg        CP -64.25205 -63.19908 -37.29587 -41.40070   1.052967 14.444530
-##  9:   sbp     gu        CP -47.22219 -55.16619 -24.80048 -30.41398  -7.943997  7.992267
-## 10:   sbp     uu        CP -34.69682 -30.31804 -19.37056 -22.09126   4.378773  6.765004</code></pre>
+<pre><code>##     Suite System Component    CorrEn     Total        OS      RefEn        SS     d_mp2
+##  1:   sbp     aa        CP -58.83831 -32.83461 -37.94211  26.003702 -37.00656 16.110351
+##  2:   sbp     ac        CP -48.02293 -42.47622 -28.61681   5.546704 -30.94071 11.534592
+##  3:   sbp     au        CP -49.22238 -35.00495 -29.07245  14.217433 -30.49937 10.349440
+##  4:   sbp     cc        CP -36.80766 -33.60944 -21.19335   3.198226 -23.12212  7.507807
+##  5:   sbp     cg        CP -42.01807 -54.77410 -22.86054 -12.756032 -26.58871  7.431174
+##  6:   sbp     cu        CP -38.36411 -45.99346 -19.35357  -7.629346 -24.59384  5.583298
+##  7:   sbp     ga        CP -60.29429 -45.43087 -37.44850  14.863428 -38.28870 15.442904
+##  8:   sbp     gg        CP -64.25205 -63.19908 -37.29587   1.052967 -41.40070 14.444530
+##  9:   sbp     gu        CP -47.22219 -55.16619 -24.80048  -7.943997 -30.41398  7.992267
+## 10:   sbp     uu        CP -34.69682 -30.31804 -19.37056   4.378773 -22.09126  6.765004</code></pre>
 <p>Hmm…the <code>d_mp2</code> values are all positive!</p>
 <p>Then, we use the Helgaker extrapolation to calculate MP2/CBS:</p>
 <pre class="r"><code># ================ Helgaker extrapolation =============== #
@@ -166,78 +166,78 @@ mp2_cbs[, cbs := (3^3 * atz - 4^3 * aqz) / (3^3 - 4^3)]</code></pre>
     data.table()
 
 print(mp2_cbs)</code></pre>
-<pre><code>##     Suite Method System Component Basis         OS        SS       RefEn
-##  1:   sbp    mp2     aa        CP   adz -37.942106 -37.00656  26.0037021
-##  2:   sbp    mp2     aa        CP   aqz -40.743271 -38.72610  25.8788316
-##  3:   sbp    mp2     aa        CP   atz -39.917921 -38.37121  25.9089710
-##  4:   sbp    mp2     aa        CP    dz -27.149716 -27.44606  26.9356806
-##  5:   sbp    mp2     aa        CP    qz -38.988192 -37.47294  26.1048078
-##  6:   sbp    mp2     aa        CP    tz -35.753367 -34.96759  26.5103077
-##  7:   sbp    mp2     aa        CP   cbs -41.345553 -38.98507  25.8568379
-##  8:   sbp    mp2     ac        CP   adz -28.616812 -30.94071   5.5467040
-##  9:   sbp    mp2     ac        CP   aqz -31.754150 -32.72896   5.5530586
-## 10:   sbp    mp2     ac        CP   atz -30.840494 -32.37720   5.5864878
-## 11:   sbp    mp2     ac        CP    dz -18.568690 -22.30087   7.3161149
-## 12:   sbp    mp2     ac        CP    qz -30.023155 -31.54534   5.8480380
-## 13:   sbp    mp2     ac        CP    tz -26.828579 -29.21428   6.4023239
-## 14:   sbp    mp2     ac        CP   cbs -32.420872 -32.98566   5.5286642
-## 15:   sbp    mp2     au        CP   adz -29.072446 -30.49937  14.2174327
-## 16:   sbp    mp2     au        CP   aqz -32.207344 -32.32491  14.1242809
-## 17:   sbp    mp2     au        CP   atz -31.308314 -31.96497  14.1531626
-## 18:   sbp    mp2     au        CP    dz -19.412837 -21.77784  15.0578903
-## 19:   sbp    mp2     au        CP    qz -30.512522 -31.12998  14.1595110
-## 20:   sbp    mp2     au        CP    tz -27.341363 -28.72077  14.4018236
-## 21:   sbp    mp2     au        CP   cbs -32.863392 -32.58757  14.1032051
-## 22:   sbp    mp2     cc        CP   adz -21.193348 -23.12212   3.1982264
-## 23:   sbp    mp2     cc        CP   aqz -23.863238 -24.52284   3.4207954
-## 24:   sbp    mp2     cc        CP   atz -23.115427 -24.25167   3.4294484
-## 25:   sbp    mp2     cc        CP    dz -12.380757 -15.75581   4.4010537
-## 26:   sbp    mp2     cc        CP    qz -22.405465 -23.54371   3.5114347
-## 27:   sbp    mp2     cc        CP    tz -19.662713 -21.59443   3.8350116
-## 28:   sbp    mp2     cc        CP   cbs -24.408938 -24.72072   3.4144811
-## 29:   sbp    mp2     cg        CP   adz -22.860540 -26.58871 -12.7560321
-## 30:   sbp    mp2     cg        CP   aqz -26.549666 -28.49926 -12.8676515
-## 31:   sbp    mp2     cg        CP   atz -25.489761 -28.13824 -12.8393327
-## 32:   sbp    mp2     cg        CP    dz -13.150062 -18.29053 -12.0546431
-## 33:   sbp    mp2     cg        CP    qz -24.841966 -27.40004 -12.9086133
-## 34:   sbp    mp2     cg        CP    tz -21.487232 -25.08255 -12.8336200
-## 35:   sbp    mp2     cg        CP   cbs -27.323111 -28.76271 -12.8883165
-## 36:   sbp    mp2     cu        CP   adz -19.353567 -24.59384  -7.6293465
-## 37:   sbp    mp2     cu        CP   aqz -22.535734 -26.34410  -7.9759813
-## 38:   sbp    mp2     cu        CP   atz -21.592652 -26.00004  -7.9100471
-## 39:   sbp    mp2     cu        CP    dz  -9.083049 -15.88712  -5.5943465
-## 40:   sbp    mp2     cu        CP    qz -20.694421 -25.09137  -7.8205607
-## 41:   sbp    mp2     cu        CP    tz -17.270784 -22.60546  -7.3159898
-## 42:   sbp    mp2     cu        CP   cbs -23.223929 -26.59517  -8.0240955
-## 43:   sbp    mp2     ga        CP   adz -37.448503 -38.28870  14.8634282
-## 44:   sbp    mp2     ga        CP   aqz -40.598990 -40.14712  14.5499226
-## 45:   sbp    mp2     ga        CP   atz -39.639532 -39.76024  14.5900501
-## 46:   sbp    mp2     ga        CP    dz -25.970293 -28.14685  16.0839672
-## 47:   sbp    mp2     ga        CP    qz -38.658599 -38.79643  14.8190359
-## 48:   sbp    mp2     ga        CP    tz -35.138242 -36.14008  15.3047080
-## 49:   sbp    mp2     ga        CP   cbs -41.299134 -40.42944  14.5206404
-## 50:   sbp    mp2     gg        CP   adz -37.295874 -41.40070   1.0529672
-## 51:   sbp    mp2     gg        CP   aqz -41.511345 -43.74160   0.6625883
-## 52:   sbp    mp2     gg        CP   atz -40.235912 -43.26646   0.7107246
-## 53:   sbp    mp2     gg        CP    dz -23.884807 -29.61715   2.0544940
-## 54:   sbp    mp2     gg        CP    qz -39.262440 -42.22103   0.8911385
-## 55:   sbp    mp2     gg        CP    tz -34.954380 -39.06953   1.1943516
-## 56:   sbp    mp2     gg        CP   cbs -42.442066 -44.08832   0.6274617
-## 57:   sbp    mp2     gu        CP   adz -24.800478 -30.41398  -7.9439971
-## 58:   sbp    mp2     gu        CP   aqz -28.422712 -32.44805  -8.3618298
-## 59:   sbp    mp2     gu        CP   atz -27.306169 -32.03602  -8.2935857
-## 60:   sbp    mp2     gu        CP    dz -13.716721 -20.67078  -5.5439783
-## 61:   sbp    mp2     gu        CP    qz -26.442067 -31.08676  -8.0877711
-## 62:   sbp    mp2     gu        CP    tz -22.732069 -28.35059  -7.4159745
-## 63:   sbp    mp2     gu        CP   cbs -29.237488 -32.74873  -8.4116296
-## 64:   sbp    mp2     uu        CP   adz -19.370563 -22.09126   4.3787728
-## 65:   sbp    mp2     uu        CP   aqz -21.946248 -23.54368   4.4188216
-## 66:   sbp    mp2     uu        CP   atz -21.240458 -23.27533   4.4261765
-## 67:   sbp    mp2     uu        CP    dz -11.888628 -15.45960   5.1687801
-## 68:   sbp    mp2     uu        CP    qz -20.626766 -22.62349   4.4476176
-## 69:   sbp    mp2     uu        CP    tz -18.175277 -20.79429   4.6934909
-## 70:   sbp    mp2     uu        CP   cbs -22.461284 -23.73951   4.4134545
-##     Suite Method System Component Basis         OS        SS       RefEn</code></pre>
+<pre><code>##     Suite Method System Component Basis         OS       RefEn        SS
+##  1:   sbp    mp2     aa        CP   adz -37.942106  26.0037021 -37.00656
+##  2:   sbp    mp2     aa        CP   aqz -40.743271  25.8788316 -38.72610
+##  3:   sbp    mp2     aa        CP   atz -39.917921  25.9089710 -38.37121
+##  4:   sbp    mp2     aa        CP   cbs -41.345553  25.8568379 -38.98507
+##  5:   sbp    mp2     aa        CP    dz -27.149716  26.9356806 -27.44606
+##  6:   sbp    mp2     aa        CP    qz -38.988192  26.1048078 -37.47294
+##  7:   sbp    mp2     aa        CP    tz -35.753367  26.5103077 -34.96759
+##  8:   sbp    mp2     ac        CP   adz -28.616812   5.5467040 -30.94071
+##  9:   sbp    mp2     ac        CP   aqz -31.754150   5.5530586 -32.72896
+## 10:   sbp    mp2     ac        CP   atz -30.840494   5.5864878 -32.37720
+## 11:   sbp    mp2     ac        CP   cbs -32.420872   5.5286642 -32.98566
+## 12:   sbp    mp2     ac        CP    dz -18.568690   7.3161149 -22.30087
+## 13:   sbp    mp2     ac        CP    qz -30.023155   5.8480380 -31.54534
+## 14:   sbp    mp2     ac        CP    tz -26.828579   6.4023239 -29.21428
+## 15:   sbp    mp2     au        CP   adz -29.072446  14.2174327 -30.49937
+## 16:   sbp    mp2     au        CP   aqz -32.207344  14.1242809 -32.32491
+## 17:   sbp    mp2     au        CP   atz -31.308314  14.1531626 -31.96497
+## 18:   sbp    mp2     au        CP   cbs -32.863392  14.1032051 -32.58757
+## 19:   sbp    mp2     au        CP    dz -19.412837  15.0578903 -21.77784
+## 20:   sbp    mp2     au        CP    qz -30.512522  14.1595110 -31.12998
+## 21:   sbp    mp2     au        CP    tz -27.341363  14.4018236 -28.72077
+## 22:   sbp    mp2     cc        CP   adz -21.193348   3.1982264 -23.12212
+## 23:   sbp    mp2     cc        CP   aqz -23.863238   3.4207954 -24.52284
+## 24:   sbp    mp2     cc        CP   atz -23.115427   3.4294484 -24.25167
+## 25:   sbp    mp2     cc        CP   cbs -24.408938   3.4144811 -24.72072
+## 26:   sbp    mp2     cc        CP    dz -12.380757   4.4010537 -15.75581
+## 27:   sbp    mp2     cc        CP    qz -22.405465   3.5114347 -23.54371
+## 28:   sbp    mp2     cc        CP    tz -19.662713   3.8350116 -21.59443
+## 29:   sbp    mp2     cg        CP   adz -22.860540 -12.7560321 -26.58871
+## 30:   sbp    mp2     cg        CP   aqz -26.549666 -12.8676515 -28.49926
+## 31:   sbp    mp2     cg        CP   atz -25.489761 -12.8393327 -28.13824
+## 32:   sbp    mp2     cg        CP   cbs -27.323111 -12.8883165 -28.76271
+## 33:   sbp    mp2     cg        CP    dz -13.150062 -12.0546431 -18.29053
+## 34:   sbp    mp2     cg        CP    qz -24.841966 -12.9086133 -27.40004
+## 35:   sbp    mp2     cg        CP    tz -21.487232 -12.8336200 -25.08255
+## 36:   sbp    mp2     cu        CP   adz -19.353567  -7.6293465 -24.59384
+## 37:   sbp    mp2     cu        CP   aqz -22.535734  -7.9759813 -26.34410
+## 38:   sbp    mp2     cu        CP   atz -21.592652  -7.9100471 -26.00004
+## 39:   sbp    mp2     cu        CP   cbs -23.223929  -8.0240955 -26.59517
+## 40:   sbp    mp2     cu        CP    dz  -9.083049  -5.5943465 -15.88712
+## 41:   sbp    mp2     cu        CP    qz -20.694421  -7.8205607 -25.09137
+## 42:   sbp    mp2     cu        CP    tz -17.270784  -7.3159898 -22.60546
+## 43:   sbp    mp2     ga        CP   adz -37.448503  14.8634282 -38.28870
+## 44:   sbp    mp2     ga        CP   aqz -40.598990  14.5499226 -40.14712
+## 45:   sbp    mp2     ga        CP   atz -39.639532  14.5900501 -39.76024
+## 46:   sbp    mp2     ga        CP   cbs -41.299134  14.5206404 -40.42944
+## 47:   sbp    mp2     ga        CP    dz -25.970293  16.0839672 -28.14685
+## 48:   sbp    mp2     ga        CP    qz -38.658599  14.8190359 -38.79643
+## 49:   sbp    mp2     ga        CP    tz -35.138242  15.3047080 -36.14008
+## 50:   sbp    mp2     gg        CP   adz -37.295874   1.0529672 -41.40070
+## 51:   sbp    mp2     gg        CP   aqz -41.511345   0.6625883 -43.74160
+## 52:   sbp    mp2     gg        CP   atz -40.235912   0.7107246 -43.26646
+## 53:   sbp    mp2     gg        CP   cbs -42.442066   0.6274617 -44.08832
+## 54:   sbp    mp2     gg        CP    dz -23.884807   2.0544940 -29.61715
+## 55:   sbp    mp2     gg        CP    qz -39.262440   0.8911385 -42.22103
+## 56:   sbp    mp2     gg        CP    tz -34.954380   1.1943516 -39.06953
+## 57:   sbp    mp2     gu        CP   adz -24.800478  -7.9439971 -30.41398
+## 58:   sbp    mp2     gu        CP   aqz -28.422712  -8.3618298 -32.44805
+## 59:   sbp    mp2     gu        CP   atz -27.306169  -8.2935857 -32.03602
+## 60:   sbp    mp2     gu        CP   cbs -29.237488  -8.4116296 -32.74873
+## 61:   sbp    mp2     gu        CP    dz -13.716721  -5.5439783 -20.67078
+## 62:   sbp    mp2     gu        CP    qz -26.442067  -8.0877711 -31.08676
+## 63:   sbp    mp2     gu        CP    tz -22.732069  -7.4159745 -28.35059
+## 64:   sbp    mp2     uu        CP   adz -19.370563   4.3787728 -22.09126
+## 65:   sbp    mp2     uu        CP   aqz -21.946248   4.4188216 -23.54368
+## 66:   sbp    mp2     uu        CP   atz -21.240458   4.4261765 -23.27533
+## 67:   sbp    mp2     uu        CP   cbs -22.461284   4.4134545 -23.73951
+## 68:   sbp    mp2     uu        CP    dz -11.888628   5.1687801 -15.45960
+## 69:   sbp    mp2     uu        CP    qz -20.626766   4.4476176 -22.62349
+## 70:   sbp    mp2     uu        CP    tz -18.175277   4.6934909 -20.79429
+##     Suite Method System Component Basis         OS       RefEn        SS</code></pre>
 <p>Thus, we merge the MP2/CBS counterpoise corrected values with the MP2 correction term from <code>adz_both.cp</code>. Note that the <strong>OS</strong> and <strong>SS</strong> come from counterpoise corrected MP2 (for both aVDZ and CBS), and <strong><code>d_mp2</code></strong> comes from <code>CCSD(T)/aVDZ - MP2/aVDZ</code>, counterpoise corrected. Are my formulas correct?</p>
 <pre class="r"><code># note using &quot;CBS&quot; basis set, removing &quot;old&quot; and duplicate columns from adz_both.cp
 ccsdt_cbs &lt;- merge(mp2_cbs[(Basis == &quot;cbs&quot; | Basis == &quot;adz&quot;), !c(&quot;Method&quot;, &quot;Component&quot;), with = F]
@@ -245,27 +245,27 @@ ccsdt_cbs &lt;- merge(mp2_cbs[(Basis == &quot;cbs&quot; | Basis == &quot;adz&quo
 ccsdt_cbs[, ccsdt.cbs := OS + SS + d_mp2]
 
 print(ccsdt_cbs[order(Basis, System)])</code></pre>
-<pre><code>##     Suite System Basis        OS        SS       RefEn    CorrEn     Total     d_mp2 ccsdt.cbs
-##  1:   sbp     aa   adz -37.94211 -37.00656  26.0037021 -58.83831 -32.83461 16.110351 -58.83831
-##  2:   sbp     ac   adz -28.61681 -30.94071   5.5467040 -48.02293 -42.47622 11.534592 -48.02293
-##  3:   sbp     au   adz -29.07245 -30.49937  14.2174327 -49.22238 -35.00495 10.349440 -49.22238
-##  4:   sbp     cc   adz -21.19335 -23.12212   3.1982264 -36.80766 -33.60944  7.507807 -36.80766
-##  5:   sbp     cg   adz -22.86054 -26.58871 -12.7560321 -42.01807 -54.77410  7.431174 -42.01807
-##  6:   sbp     cu   adz -19.35357 -24.59384  -7.6293465 -38.36411 -45.99346  5.583298 -38.36411
-##  7:   sbp     ga   adz -37.44850 -38.28870  14.8634282 -60.29429 -45.43087 15.442904 -60.29429
-##  8:   sbp     gg   adz -37.29587 -41.40070   1.0529672 -64.25205 -63.19908 14.444530 -64.25205
-##  9:   sbp     gu   adz -24.80048 -30.41398  -7.9439971 -47.22219 -55.16619  7.992267 -47.22219
-## 10:   sbp     uu   adz -19.37056 -22.09126   4.3787728 -34.69682 -30.31804  6.765004 -34.69682
-## 11:   sbp     aa   cbs -41.34555 -38.98507  25.8568379 -58.83831 -32.83461 16.110351 -64.22028
-## 12:   sbp     ac   cbs -32.42087 -32.98566   5.5286642 -48.02293 -42.47622 11.534592 -53.87194
-## 13:   sbp     au   cbs -32.86339 -32.58757  14.1032051 -49.22238 -35.00495 10.349440 -55.10152
-## 14:   sbp     cc   cbs -24.40894 -24.72072   3.4144811 -36.80766 -33.60944  7.507807 -41.62185
-## 15:   sbp     cg   cbs -27.32311 -28.76271 -12.8883165 -42.01807 -54.77410  7.431174 -48.65465
-## 16:   sbp     cu   cbs -23.22393 -26.59517  -8.0240955 -38.36411 -45.99346  5.583298 -44.23580
-## 17:   sbp     ga   cbs -41.29913 -40.42944  14.5206404 -60.29429 -45.43087 15.442904 -66.28567
-## 18:   sbp     gg   cbs -42.44207 -44.08832   0.6274617 -64.25205 -63.19908 14.444530 -72.08585
-## 19:   sbp     gu   cbs -29.23749 -32.74873  -8.4116296 -47.22219 -55.16619  7.992267 -53.99395
-## 20:   sbp     uu   cbs -22.46128 -23.73951   4.4134545 -34.69682 -30.31804  6.765004 -39.43579</code></pre>
+<pre><code>##     Suite System Basis        OS       RefEn        SS    CorrEn     Total     d_mp2 ccsdt.cbs
+##  1:   sbp     aa   adz -37.94211  26.0037021 -37.00656 -58.83831 -32.83461 16.110351 -58.83831
+##  2:   sbp     ac   adz -28.61681   5.5467040 -30.94071 -48.02293 -42.47622 11.534592 -48.02293
+##  3:   sbp     au   adz -29.07245  14.2174327 -30.49937 -49.22238 -35.00495 10.349440 -49.22238
+##  4:   sbp     cc   adz -21.19335   3.1982264 -23.12212 -36.80766 -33.60944  7.507807 -36.80766
+##  5:   sbp     cg   adz -22.86054 -12.7560321 -26.58871 -42.01807 -54.77410  7.431174 -42.01807
+##  6:   sbp     cu   adz -19.35357  -7.6293465 -24.59384 -38.36411 -45.99346  5.583298 -38.36411
+##  7:   sbp     ga   adz -37.44850  14.8634282 -38.28870 -60.29429 -45.43087 15.442904 -60.29429
+##  8:   sbp     gg   adz -37.29587   1.0529672 -41.40070 -64.25205 -63.19908 14.444530 -64.25205
+##  9:   sbp     gu   adz -24.80048  -7.9439971 -30.41398 -47.22219 -55.16619  7.992267 -47.22219
+## 10:   sbp     uu   adz -19.37056   4.3787728 -22.09126 -34.69682 -30.31804  6.765004 -34.69682
+## 11:   sbp     aa   cbs -41.34555  25.8568379 -38.98507 -58.83831 -32.83461 16.110351 -64.22028
+## 12:   sbp     ac   cbs -32.42087   5.5286642 -32.98566 -48.02293 -42.47622 11.534592 -53.87194
+## 13:   sbp     au   cbs -32.86339  14.1032051 -32.58757 -49.22238 -35.00495 10.349440 -55.10152
+## 14:   sbp     cc   cbs -24.40894   3.4144811 -24.72072 -36.80766 -33.60944  7.507807 -41.62185
+## 15:   sbp     cg   cbs -27.32311 -12.8883165 -28.76271 -42.01807 -54.77410  7.431174 -48.65465
+## 16:   sbp     cu   cbs -23.22393  -8.0240955 -26.59517 -38.36411 -45.99346  5.583298 -44.23580
+## 17:   sbp     ga   cbs -41.29913  14.5206404 -40.42944 -60.29429 -45.43087 15.442904 -66.28567
+## 18:   sbp     gg   cbs -42.44207   0.6274617 -44.08832 -64.25205 -63.19908 14.444530 -72.08585
+## 19:   sbp     gu   cbs -29.23749  -8.4116296 -32.74873 -47.22219 -55.16619  7.992267 -53.99395
+## 20:   sbp     uu   cbs -22.46128   4.4134545 -23.73951 -34.69682 -30.31804  6.765004 -39.43579</code></pre>
 <p>Now, notice that I used both MP2/CBS and MP2/aVDZ. Here’s the weird thing. Below are the old CCSD(T)/CBS results, along with the SRS/VTZ and VQZ that Dennis calculated. The aVDZ results above are much closer to the SRS results below! Whereas the new CBS results are rather high.</p>
 <pre><code>    ccsd(t)/cbs     Eint(srs)/tz    Eint(srs)/qz
 AA  -52.01886741    -57.09531123    -57.13304834
@@ -278,9 +278,70 @@ GA  -52.30441493    -56.62308196    -56.81254076
 GG  -53.99221117    -56.43450303    -56.5931341
 GU  -41.20755022    -45.9184363     -43.39385213
 UU  -34.76382056    -34.11152255    -32.34332397</code></pre>
-<div id="any-ideas-what-might-be-the-problem" class="section level3">
-<h3><em>Any ideas what might be the problem?</em></h3>
-</div>
+<p>Calculating $ _{s}$:</p>
+<pre class="r"><code>mp2_spin &lt;- sbp_mp2[Component == &quot;nonCP&quot;, !c(&quot;Method&quot;, &quot;RefEn&quot;), with = FALSE]
+
+mp2_spin &lt;- merge(mp2_spin, ccsdt_cbs[Basis == &quot;cbs&quot;, !c(&quot;OS&quot;, &quot;SS&quot;, &quot;RefEn&quot;, &quot;Basis&quot;, &quot;Total&quot;), with = F]
+                  , by = c(&quot;Suite&quot;, &quot;System&quot;))
+
+mp2_spin[, eps := OS / SS]
+mp2_spin[, r := as.factor(ifelse(eps &gt; 1, &quot;A&quot;, &quot;B&quot;))]</code></pre>
+<p>Inputting the scaling parameters, and calculating the scaled energies:</p>
+<pre class="r"><code>paramA &lt;- data.table(r = as.factor(&quot;A&quot;)
+                    , Basis = c(&quot;dz&quot;, &quot;tz&quot;, &quot;qz&quot;, &quot;adz&quot;, &quot;atz&quot;, &quot;aqz&quot;)
+                    , c.OS = 0
+                    , c.SS = c(1.752, 1.640, 1.689, 1.372, 1.443, 1.591))
+
+paramB &lt;- data.table(r = as.factor(&quot;B&quot;)
+                    , Basis = c(&quot;dz&quot;, &quot;tz&quot;, &quot;qz&quot;, &quot;adz&quot;, &quot;atz&quot;, &quot;aqz&quot;)
+                    , c.OS = c(0.543, 0.660, 0.671, 0.856, 0.635, 0.699)
+                    , c.SS = c(1.518, 1.140, 1.119, 1.033, 1.047, 1.075))
+
+params_SRS.1 &lt;- rbind(paramA, paramB)
+
+# merge 
+srs.dt &lt;- merge(mp2_spin, params_SRS.1, by = c(&quot;Basis&quot;, &quot;r&quot;))
+
+
+srs.dt[, srs.1 := c.OS * OS + c.SS * SS]</code></pre>
+<p>Here are the energies of SRS/aVTZ, compared with CCSD(T)/CBS (new geometries):</p>
+<pre class="r"><code>srs.dt[Basis == &quot;tz&quot;, c(&quot;System&quot;, &quot;ccsdt.cbs&quot;, &quot;srs.1&quot;), with = F] %&gt;% print()</code></pre>
+<pre><code>##     System ccsdt.cbs     srs.1
+##  1:     aa -64.22028 -61.64598
+##  2:     ac -53.87194 -51.97001
+##  3:     au -55.10152 -51.30296
+##  4:     cc -41.62185 -38.47977
+##  5:     cg -48.65465 -45.70845
+##  6:     ga -66.28567 -64.10917
+##  7:     gg -72.08585 -69.99903
+##  8:     uu -39.43579 -36.96563
+##  9:     cu -44.23580 -44.44310
+## 10:     gu -53.99395 -56.28164</code></pre>
+<p>Now for the moment of truth, the errors:</p>
+<pre class="r"><code>print(srs.dt[, as.list(nomed.stats(ccsdt.cbs - srs.1)), by = .(Basis)])</code></pre>
+<pre><code>##    Basis      MAE        SD        Min        Max
+## 1:   adz 5.335803 0.6786744 -6.6406455 -4.3740401
+## 2:   aqz 1.945507 1.6153691 -2.9504361  2.9513717
+## 3:   atz 5.795962 0.8754927 -6.9598345 -4.3749224
+## 4:    dz 6.774802 2.8158222 -9.1640928 -0.4557793
+## 5:    qz 1.551496 1.1387515 -0.6225311  2.7371161
+## 6:    tz 2.359153 1.7979774 -3.7985625  2.2876887</code></pre>
+<p>Here are the errors for the three best performing basis sets:</p>
+<pre class="r"><code>srs.dt[Basis == &quot;tz&quot; | Basis == &quot;qz&quot; | Basis == &quot;aqz&quot;
+                    , ccsdt.cbs - srs.1, by = .(System, Basis)] %&gt;%
+    spread(Basis, V1) %&gt;%
+    print()</code></pre>
+<pre><code>##     System       aqz         qz         tz
+##  1:     aa -1.803533  1.0380299 -2.5742948
+##  2:     ac -1.095562  1.2813647 -1.9019229
+##  3:     au -2.950436 -0.6225311 -3.7985625
+##  4:     cc -2.042916 -0.3373006 -3.1420787
+##  5:     cg -2.600949  2.5775776 -2.9462012
+##  6:     cu  2.951372  1.2718256  0.2072941
+##  7:     ga -1.526729  1.3870740 -2.1765010
+##  8:     gg -1.482424  1.8368510 -2.0868229
+##  9:     gu -1.578941  2.7371161  2.2876887
+## 10:     uu -1.422208  2.4252938 -2.4701626</code></pre>
 
 
 

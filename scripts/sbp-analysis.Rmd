@@ -9,6 +9,8 @@ options(width = 140)
 require(data.table)
 require(magrittr)
 require(tidyr)
+
+source("~/GoogleDrive/srs-app/scripts/gen_func.r")
 ```
 
 Here, we have re-optimised the geometries for the stacked base pairs using Truhlar's M06-2X functional along with aug-cc-pVDZ in ethanol. Then CCSD(T)/aVDZ and MP2/(aug)-cc-pVXZ calculations, where X = D,T,Q, were run.
@@ -20,13 +22,13 @@ sbp_ccsdt <- read.csv(file = "~/GoogleDrive/srs-app/data/sbp-ccsdt-adz.edat", he
 sbp_mp2 <- read.csv(file = "~/GoogleDrive/srs-app/data/sbp-mp2.edat", header = TRUE
                     , sep = "|", strip.white = TRUE) %>% data.table()
 
-sbp_ccsdt <- gather(sbp_ccsdt, En, value, CorrEn, Total)            # make super long
-sbp_mp2 <- gather(sbp_mp2, En, value, OS:RefEn)
+sbp_ccsdt <- gather(sbp_ccsdt, En, value, CorrEn, Total) %>% data.table()            # make super long
+sbp_mp2 <- gather(sbp_mp2, En, value, OS:RefEn) %>% data.table()
 
-sbp_ccsdt[, value := 2625.5 * value]                                # convert to kJ/mol
+sbp_ccsdt[, value := 2625.5 * value]                                                 # convert to kJ/mol
 sbp_mp2[, value := 2625.5 * value]  
 
-sbp_ccsdt <- spread(sbp_ccsdt, Component, value) %>% data.table()   # widen by Component
+sbp_ccsdt <- spread(sbp_ccsdt, Component, value) %>% data.table()                    # widen by Component
 sbp_mp2 <- spread(sbp_mp2, Component, value) %>% data.table()
 
 # A-alone etc. not valid column names
@@ -87,7 +89,7 @@ Hmm...the `d_mp2` values are all positive!
 ```{r, include = FALSE}
 
 # to calculate MP2/CBS
-mp2_cbs <- gather(sbp_mp2, En, value, OS:RefEn) %>%
+mp2_cbs <- gather(sbp_mp2, En, value, OS, SS, RefEn) %>%
     spread(Basis, value) %>%
     data.table()
 ```
@@ -135,4 +137,53 @@ GU	-41.20755022	-45.9184363	    -43.39385213
 UU	-34.76382056	-34.11152255	-32.34332397
 ```
 
-### _Any ideas what might be the problem?_
+Calculating $ \epsilon_{\Delta s}$: 
+```{r}
+mp2_spin <- sbp_mp2[Component == "nonCP", !c("Method", "RefEn"), with = FALSE]
+
+mp2_spin <- merge(mp2_spin, ccsdt_cbs[Basis == "cbs", !c("OS", "SS", "RefEn", "Basis", "Total"), with = F]
+                  , by = c("Suite", "System"))
+
+mp2_spin[, eps := OS / SS]
+mp2_spin[, r := as.factor(ifelse(eps > 1, "A", "B"))]
+```
+
+Inputting the scaling parameters, and calculating the scaled energies:
+```{r}
+paramA <- data.table(r = as.factor("A")
+                    , Basis = c("dz", "tz", "qz", "adz", "atz", "aqz")
+                    , c.OS = 0
+                    , c.SS = c(1.752, 1.640, 1.689, 1.372, 1.443, 1.591))
+
+paramB <- data.table(r = as.factor("B")
+                    , Basis = c("dz", "tz", "qz", "adz", "atz", "aqz")
+                    , c.OS = c(0.543, 0.660, 0.671, 0.856, 0.635, 0.699)
+                    , c.SS = c(1.518, 1.140, 1.119, 1.033, 1.047, 1.075))
+
+params_SRS.1 <- rbind(paramA, paramB)
+
+# merge 
+srs.dt <- merge(mp2_spin, params_SRS.1, by = c("Basis", "r"))
+
+
+srs.dt[, srs.1 := c.OS * OS + c.SS * SS]
+```
+
+Here are the energies of SRS/aVTZ, compared with CCSD(T)/CBS (new geometries):
+```{r}
+srs.dt[Basis == "tz", c("System", "ccsdt.cbs", "srs.1"), with = F] %>% print()
+```
+
+Now for the moment of truth, the errors:
+```{r}
+print(srs.dt[, as.list(nomed.stats(ccsdt.cbs - srs.1)), by = .(Basis)])
+```
+
+Here are the errors for the three best performing basis sets:
+```{r}
+srs.dt[Basis == "tz" | Basis == "qz" | Basis == "aqz"
+                    , ccsdt.cbs - srs.1, by = .(System, Basis)] %>%
+    spread(Basis, V1) %>%
+    print()
+```
+
