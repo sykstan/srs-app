@@ -1,0 +1,144 @@
+---
+title: "Hydrogen-bonded Ionic Liquids (SRS-MP2)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "figs/")
+options(width = 140)
+require(data.table)
+require(magrittr)
+require(tidyr)
+require(ggplot2)
+
+source("~/GoogleDrive/srs-app/scripts/gen_func.r")
+```
+
+The raw geometries of 42 hydrogen-bonded ionic liquids were constructed and then geometry optimised using Truhlar's M06-2X functional along with aug-cc-pVDZ in ethanol. Then CCSD(T)/aVDZ and MP2/(aug)-cc-pVXZ calculations, where X = D,T,Q, were run.
+
+```{r, include = FALSE}
+hbil_ccsdt <- read.csv(file = "~/GoogleDrive/srs-app/data/hbil-ccsdt-adz.edat", header = TRUE
+         , sep = "|", strip.white = TRUE) %>% data.table()
+
+hbil_mp2 <- read.csv(file = "~/GoogleDrive/srs-app/data/hbil-mp2.edat", header = TRUE
+                    , sep = "|", strip.white = TRUE) %>% data.table()
+
+hbil_ccsdt <- gather(hbil_ccsdt, En, value, CorrEn, Total) %>% data.table()            # make super long
+hbil_mp2 <- gather(hbil_mp2, En, value, OS:RefEn) %>% data.table()
+
+hbil_ccsdt[, value := 2625.5 * value]                                                 # convert to kJ/mol
+hbil_mp2[, value := 2625.5 * value]  
+
+hbil_ccsdt <- spread(hbil_ccsdt, Component, value) %>% data.table()                    # widen by Component
+hbil_mp2 <- spread(hbil_mp2, Component, value) %>% data.table()
+
+# A-alone etc. not valid column names
+setnames(hbil_ccsdt, names(hbil_ccsdt), make.names(names(hbil_ccsdt)))
+setnames(hbil_mp2, names(hbil_mp2), make.names(names(hbil_mp2)))
+
+hbil_ccsdt[, nonCP := complex - A.alone - B.alone]                   # non-counterpoise corrected
+hbil_ccsdt[, CP := complex - A.ghostB - B.ghostA]                    # counterpoise corrected
+
+hbil_mp2[, nonCP := complex - A.alone - B.alone]
+hbil_mp2[, CP := complex - A.ghostB - B.ghostA]
+
+hbil_ccsdt <- gather(hbil_ccsdt, Component, value, A.alone:CP) %>%
+    spread(En, value) %>%
+    data.table()
+
+hbil_mp2 <- gather(hbil_mp2, Component, value, A.alone:CP) %>%
+    spread(En, value) %>%
+    data.table()
+
+
+setkey(hbil_ccsdt, Suite, Method, Basis, System, Component)
+setkey(hbil_mp2, Suite, Method, Basis, System, Component)
+
+# merge CCSD(T) [CorrEn, Total] and MP2 [OS, SS, RefEn] data for aVDZ
+# this is for calculating the MP2 correction term for CCSD(T)
+# Note: all counterpoise corrected correlation energies (OS + SS)
+# should be 10 rows only!
+hbil.adz_both.cp <- merge(hbil_ccsdt[Component == "CP", !c("Basis", "Method"), with = F]
+                  , hbil_mp2[Basis == "adz" & Component == "CP", !c("Basis", "Method"), with = F]
+                  , by = c("Suite", "System", "Component"))
+
+hbil.adz_both.cp[, d_mp2 := CorrEn - OS - SS]
+
+print(hbil.adz_both.cp)
+
+hbil.mp2_cbs <- gather(hbil_mp2, En, value, OS, SS, RefEn) %>%
+    spread(Basis, value) %>%
+    data.table()
+
+# ================ Helgaker extrapolation =============== #
+hbil.mp2_cbs[, cbs := (3^3 * atz - 4^3 * aqz) / (3^3 - 4^3)]
+
+hbil.mp2_cbs <- gather(hbil.mp2_cbs[Component == "CP"], Basis, value, adz:cbs) %>%
+    spread(En, value) %>%
+    data.table()
+
+print(hbil.mp2_cbs)
+
+hbil.ccsdt_cbs <- merge(hbil.mp2_cbs[(Basis == "cbs"), !c("Method", "Component"), with = F]
+                   , hbil.adz_both.cp[, !c("OS", "SS", "RefEn", "Component"), with = F], by = c("Suite", "System"))
+hbil.ccsdt_cbs[, ccsdt.cbs := OS + SS + d_mp2]
+
+print(hbil.ccsdt_cbs[order(Basis, System)])
+```
+
+And the number of high and low ratios by basis set, as well as the distributions (note the low number $\epsilon_{\Delta s} < 1$ systems):
+
+```{r}
+hbil.mp2_spin <- hbil_mp2[Component == "nonCP", !c("Method", "RefEn"), with = FALSE]
+
+hbil.mp2_spin <- merge(hbil.mp2_spin, hbil.ccsdt_cbs[Basis == "cbs", !c("OS", "SS", "RefEn", "Basis", "Total"), with = F]
+                  , by = c("Suite", "System"))
+
+hbil.mp2_spin[, eps := OS / SS]
+hbil.mp2_spin[, r := as.factor(ifelse(eps > 1, "A", "B"))]
+
+print(hbil.mp2_spin[, nrow(.SD), by = .(r, Basis)])
+
+ggplot(hbil.mp2_spin, aes(x = eps, y = ..count..)) +
+    #geom_freqpoly(binwidth = 0.005, aes(colour = Basis, linetype = r)) #+
+    geom_density(aes(fill = r), alpha = 0.4) +
+    theme_bw() +
+    facet_wrap(~ Basis) +
+    scale_fill_manual(name = bquote(epsilon[Delta*s]), values = c("orange", "blue")) 
+
+```
+
+The procedure followed is pretty much identical to that of the stacked base pairs, so very briefly:
+
+1. Helgaker extrapolation, using correction term assuming basis set indifference between MP2 and CCSD(T) to obtain CCSD(T)/CBS.
+2. All energies used for the benchmark energies were counterpoise corrected.
+3. **Non-counterpoise corrected** energies used for SRS-MP2, the coefficients are displayed in the code below.
+
+```{r}
+paramA <- data.table(r = as.factor("A")
+                    , Basis = c("dz", "tz", "qz", "adz", "atz", "aqz")
+                    , c.OS = 0
+                    , c.SS = c(1.752, 1.640, 1.689, 1.372, 1.443, 1.591))
+
+paramB <- data.table(r = as.factor("B")
+                    , Basis = c("dz", "tz", "qz", "adz", "atz", "aqz")
+                    , c.OS = c(0.543, 0.660, 0.671, 0.856, 0.635, 0.699)
+                    , c.SS = c(1.518, 1.140, 1.119, 1.033, 1.047, 1.075))
+
+params_SRS.1 <- rbind(paramA, paramB)
+
+# merge 
+hbil.srs.dt <- merge(hbil.mp2_spin, params_SRS.1, by = c("Basis", "r"))
+
+
+hbil.srs.dt[, srs.1 := c.OS * OS + c.SS * SS]
+```
+
+
+And the errors, by basis set:
+```{r}
+print(hbil.srs.dt[, as.list(nomed.stats(ccsdt.cbs - srs.1)), by = .(Basis)])
+```
+
+
+
