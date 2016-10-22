@@ -1,0 +1,57 @@
+---
+title: 'S66x8 Potential Energy Surfaces: SRS-MP2'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 140)
+require(data.table)
+require(magrittr)
+require(tidyr)
+require(stringr)
+
+source("~/GoogleDrive/srs-app/scripts/gen_func.r")
+```
+
+```{r, include=FALSE}
+s66x8_mp2 <- read.table(file = "~/GoogleDrive/srs-app/data/s66x8-mp2.edat"
+           , header = TRUE, sep = "|", strip.white = TRUE) %>% data.table()
+```
+
+```{r}
+s66x8_ccsdt <- read.table(file = "~/GoogleDrive/srs-app/data/s66x8_reference.txt"
+           , header = FALSE, skip = 2) %>% data.table()
+
+s66x8_ccsdt[, V2 := 4.184 * V2]                                 # kJ/mol
+setnames(s66x8_ccsdt, old = "V2", new = "ccsdt.cbs")            # rename
+
+s66x8_ccsdt[, V1 := as.character(V1)]                           # correct type
+s66x8_ccsdt[, V1 := gsub(".xyz", "", x = V1)]                   # drop .xyz ending
+
+# left split once to get system number (1-66)
+s66x8_ccsdt[, c("Num", "Rest") := transpose(str_split(V1, pattern = "_", n = 2))]
+
+# function to reverse (one) string
+strReverse <- function(x) {
+    y = strsplit(x, NULL)[[1]]
+    y = rev(y)
+    return(paste(y, collapse = ""))
+}
+
+# reverse the column Rest
+s66x8_ccsdt[, reverzed := sapply(Rest, strReverse)]
+
+# left split once on reversed column
+s66x8_ccsdt[, c("Dist", "System") := transpose(str_split(reverzed, pattern = "_", n = 2))]
+
+# reverse back, apply correct type, delete old columns
+s66x8_ccsdt[, Dist := as.numeric(sapply(Dist, strReverse))]
+s66x8_ccsdt[, System := as.factor(sapply(System, strReverse))]
+s66x8_ccsdt[, c("V1", "Rest", "reverzed") := NULL]
+
+
+
+```
+
+
