@@ -137,8 +137,8 @@ print(hbil.mp2_spin[, nrow(.SD), by = .(r, Basis)])</code></pre>
 ##  4: A    dz 40
 ##  5: A    qz 29
 ##  6: A    tz 39
-##  7: B    qz 13
-##  8: B   aqz 12
+##  7: B   aqz 12
+##  8: B    qz 13
 ##  9: B   adz  4
 ## 10: B    tz  3
 ## 11: B   atz  2
@@ -182,6 +182,76 @@ hbil.srs.dt[, srs.1 := c.OS * OS + c.SS * SS]</code></pre>
 ## 4:    dz 3.326660 4.021960  -8.907997 11.420101
 ## 5:    qz 2.227345 2.258830  -4.283785  3.716149
 ## 6:    tz 2.224755 2.447609  -5.198028  6.051851</code></pre>
+<p>And the largest errors for SRS-MP2:</p>
+<pre class="r"><code>hbil.srs.dt[abs(ccsdt.cbs - srs.1) &gt; 3 &amp; Basis == &quot;tz&quot;]</code></pre>
+<pre><code>##     Basis r Suite            System Component        OS        SS    CorrEn      d_mp2 ccsdt.cbs       eps c.OS c.SS     srs.1
+##  1:    tz A  hbil EtMeNH2-CF3SO3-p1     nonCP -24.85911 -20.99670 -30.41427  0.1960809 -37.53663 1.1839531 0.00 1.64 -34.43459
+##  2:    tz A  hbil       EtNH3-Cl-p1     nonCP -22.59371 -18.20779 -23.94447  2.2208974 -32.91470 1.2408814 0.00 1.64 -29.86077
+##  3:    tz A  hbil    TMEA-CF3SO3-p1     nonCP -21.69979 -17.60627 -27.46470 -0.2790428 -32.41557 1.2325031 0.00 1.64 -28.87429
+##  4:    tz A  hbil        TMEA-Cl-p1     nonCP -17.64796 -14.85441 -21.74678  0.7377518 -28.31055 1.1880616 0.00 1.64 -24.36124
+##  5:    tz A  hbil       TMEA-TFA-p1     nonCP -21.15107 -17.89191 -27.23387 -0.4915807 -32.92164 1.1821579 0.00 1.64 -29.34274
+##  6:    tz A  hbil     TMEA-mOSO3-p1     nonCP -20.78163 -17.56413 -26.19685 -0.3259558 -32.65905 1.1831858 0.00 1.64 -28.80518
+##  7:    tz A  hbil     mim-CF3SO3-p1     nonCP -17.52946 -15.23863 -23.06095 -1.8242929 -28.74053 1.1503301 0.00 1.64 -24.99136
+##  8:    tz A  hbil        mim-NO3-p2     nonCP -29.55903 -22.86908 -36.44960  2.8481029 -42.70332 1.2925322 0.00 1.64 -37.50530
+##  9:    tz A  hbil      mim-mOSO3-p1     nonCP -17.17843 -16.27249 -22.77115 -1.2614990 -29.82373 1.0556733 0.00 1.64 -26.68688
+## 10:    tz B  hbil     mim-CF3SO3-p2     nonCP -15.83793 -16.15053 -18.70900  0.4475030 -24.89063 0.9806443 0.66 1.14 -28.86464
+## 11:    tz B  hbil       mim-mSO3-p1     nonCP -14.46620 -17.53789 -14.34067  1.3276451 -23.48903 0.8248539 0.66 1.14 -29.54089</code></pre>
+<pre class="r"><code>hbil.srs.dt[abs(ccsdt.cbs - srs.1) &gt; 3 &amp; Basis == &quot;qz&quot;]</code></pre>
+<pre><code>##     Basis r Suite            System Component        OS        SS    CorrEn      d_mp2 ccsdt.cbs       eps  c.OS  c.SS     srs.1
+##  1:    qz A  hbil EtMeNH2-CF3SO3-p1     nonCP -22.43071 -19.97788 -30.41427  0.1960809 -37.53663 1.1227772 0.000 1.689 -33.74263
+##  2:    qz A  hbil    TMEA-CF3SO3-p1     nonCP -19.75847 -16.65588 -27.46470 -0.2790428 -32.41557 1.1862757 0.000 1.689 -28.13179
+##  3:    qz A  hbil       TMEA-TFA-p1     nonCP -19.27615 -17.27596 -27.23387 -0.4915807 -32.92164 1.1157786 0.000 1.689 -29.17910
+##  4:    qz A  hbil     TMEA-mOSO3-p1     nonCP -19.25686 -16.86942 -26.19685 -0.3259558 -32.65905 1.1415248 0.000 1.689 -28.49245
+##  5:    qz A  hbil     mim-CF3SO3-p1     nonCP -15.71655 -14.62929 -23.06095 -1.8242929 -28.74053 1.0743211 0.000 1.689 -24.70887
+##  6:    qz A  hbil        mim-NO3-p2     nonCP -27.56523 -22.84756 -36.44960  2.8481029 -42.70332 1.2064846 0.000 1.689 -38.58953
+##  7:    qz B  hbil       DMEA-TFA-p1     nonCP -22.16753 -22.60677 -28.80507  1.3473793 -37.08815 0.9805703 0.671 1.119 -40.17139
+##  8:    qz B  hbil      DMEA-mSO3-p1     nonCP -21.11613 -22.12872 -26.85574  1.8120297 -35.76265 0.9542408 0.671 1.119 -38.93096
+##  9:    qz B  hbil       mim-mSO3-p1     nonCP -12.77292 -16.65286 -14.34067  1.3276451 -23.48903 0.7670103 0.671 1.119 -27.20518
+## 10:    qz B  hbil      mpyr-mSO3-p1     nonCP -25.30598 -25.91853 -33.09859  2.4855439 -42.66563 0.9763665 0.671 1.119 -45.98314</code></pre>
+<p>This isn’t very encouraging. What if we fit new coefficients to the 42 HBILs, and see how they perform?</p>
+<pre class="r"><code>hbil.srs.dt[, coef.simple.fn(.SD, x = &quot;ccsdt.cbs&quot;, y = c(&quot;OS&quot;, &quot;SS&quot;, &quot;0&quot;)), by = .(Basis)] %&gt;% print()</code></pre>
+<pre><code>##    Basis        OS        SS      R.sq       MAE        Med       SD       Min      Max  n
+## 1:   adz 0.5590860 1.2192060 0.9972295 1.4554320 -0.4739056 1.793153 -3.574205 3.635298 42
+## 2:   aqz 0.8597523 0.9419270 0.9986248 1.0353370 -0.3580203 1.263701 -2.866606 2.711035 42
+## 3:   atz 0.8862052 0.8142564 0.9988579 0.9795642 -0.2789152 1.151356 -2.422564 1.899591 42
+## 4:    dz 0.7167963 0.8816213 0.9902174 2.8693622 -0.9118188 3.369011 -5.878940 6.754469 42
+## 5:    qz 0.7095632 0.9987244 0.9980200 1.3056389 -0.2777456 1.521001 -2.978011 2.945817 42
+## 6:    tz 0.6802021 0.9115023 0.9968488 1.5988585 -0.3827727 1.918214 -3.306514 3.995235 42</code></pre>
+<p>Hmm…the coefficients for OS are higher, and that of SS are lower, compared to the SRS coefficients (from S88 + IL174). But notice the errors do not decrease a lot. Max error for cc-pVTZ is now <strong>just</strong> below chemical accuracy, and the best performing basis set, cc-pVQZ, still has max error about 3 <span class="math inline">\(\text{kJ mol}^{-1}\)</span>. However, except for cc-pVDZ, all max errors are now below 4.</p>
+<p>Here, we did not separate by ratio, as in SRS-MP2, because for most basis sets, the majority of systems have <span class="math inline">\(\epsilon_{\Delta s} &gt; 1\)</span>. But what if we did separate by ratio?</p>
+<pre class="r"><code>hbil.srs.dt[r == &quot;A&quot;, coef.simple.fn(.SD, x = &quot;ccsdt.cbs&quot;, y = c(&quot;OS&quot;, &quot;0&quot;)), by = .(Basis)]</code></pre>
+<pre><code>##    Basis       OS      R.sq      MAE        Med       SD       Min      Max  n
+## 1:   adz 1.579025 0.9949674 2.065174 -0.5735712 2.493859 -4.873317 4.430452 38
+## 2:   aqz 1.690879 0.9985315 1.082989 -0.2135135 1.371107 -3.129014 2.698014 30
+## 3:   atz 1.570332 0.9980478 1.252672 -0.3289144 1.532939 -3.146840 2.695870 40
+## 4:    dz 1.403436 0.9881972 3.066477 -1.7219948 3.747594 -6.824298 7.329174 40
+## 5:    qz 1.603732 0.9969603 1.784952 -0.8241754 1.978704 -3.535383 3.157525 29
+## 6:    tz 1.472780 0.9949181 1.989436 -0.5302107 2.484229 -4.523677 5.060549 39</code></pre>
+<pre class="r"><code>hbil.srs.dt[r == &quot;B&quot;, coef.simple.fn(.SD, x = &quot;ccsdt.cbs&quot;, y = c(&quot;OS&quot;, &quot;SS&quot;, &quot;0&quot;)), by = .(Basis)]</code></pre>
+<pre><code>##    Basis         OS          SS      R.sq       MAE        Med        SD       Min       Max  n
+## 1:   adz  1.4611339   0.4634930 0.9920808 1.8414706 -0.5299040 2.1454135 -2.710309 1.4574227  4
+## 2:   aqz  0.8527553   0.9556001 0.9978069 1.1988860 -0.2401157 1.4514319 -2.798681 1.5782609 12
+## 3:   atz 35.7662579 -28.4423674 1.0000000 0.0000000  0.0000000 0.0000000  0.000000 0.0000000  2
+## 4:    dz  3.2153357  -1.6282284 1.0000000 0.0000000  0.0000000 0.0000000  0.000000 0.0000000  2
+## 5:    qz  1.0146487   0.7006199 0.9976266 1.2831620  0.1685835 1.5165327 -2.616935 1.3576598 13
+## 6:    tz  1.1404248   0.4288432 0.9989196 0.5762527  0.0973805 0.8452039 -1.101798 0.5295801  3</code></pre>
+<p>So…large errors still for “A” systems, which is where the majority of ion pairs lie. “B” systems have a much smaller number, so correspondingly smaller errors. Ignoring the double-<span class="math inline">\(\zeta\)</span> basis sets, cc-pVTZ has the largest max errors…and MAE…and SD. Not very encouraging :(</p>
+<div id="comparing-cp-corrected-mp2-against-ccsdtcbs" class="section level3">
+<h3>Comparing CP corrected MP2 against CCSD(T)/CBS</h3>
+<pre class="r"><code>hbil.mp2_cp &lt;- merge(hbil.mp2_cbs
+                     , hbil.ccsdt_cbs[, c(&quot;Suite&quot;, &quot;System&quot;, &quot;ccsdt.cbs&quot;), with = F]
+                     , by = c(&quot;Suite&quot;, &quot;System&quot;))
+hbil.mp2_cp[, as.list(nomed.stats(ccsdt.cbs - OS - SS)), by = .(Basis)] %&gt;% print()</code></pre>
+<pre><code>##    Basis      MAE       SD        Min       Max
+## 1:   adz 6.651300 1.536326  -9.605202 -3.405624
+## 2:   aqz 1.140407 1.487467  -4.205074  2.846993
+## 3:   atz 1.826041 1.407006  -5.254068  1.243153
+## 4:    dz 9.957552 3.747539 -17.962274 -2.509151
+## 5:    qz 1.505630 1.957929  -4.000741  4.255156
+## 6:    tz 2.610960 2.453128  -7.494378  3.143841
+## 7:   cbs 1.440973 1.587127  -3.439591  4.017363</code></pre>
+<p>Looks like aug-cc-pVQZ is the best, even better than MP2/CBS.</p>
+</div>
 
 
 

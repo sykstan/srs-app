@@ -23,13 +23,16 @@ hbil_ccsdt <- read.csv(file = "~/GoogleDrive/srs-app/data/hbil-ccsdt-adz.edat", 
 hbil_mp2 <- read.csv(file = "~/GoogleDrive/srs-app/data/hbil-mp2.edat", header = TRUE
                     , sep = "|", strip.white = TRUE) %>% data.table()
 
-hbil_ccsdt <- gather(hbil_ccsdt, En, value, CorrEn, Total) %>% data.table()            # make super long
+hbil_ccsdt[, System := gsub(pattern = "-opt", replacement = "", x = System)]            # drop "-opt"
+hbil_mp2[, System := gsub(pattern = "-opt", replacement = "", x = System)]
+
+hbil_ccsdt <- gather(hbil_ccsdt, En, value, CorrEn, Total) %>% data.table()             # make super long
 hbil_mp2 <- gather(hbil_mp2, En, value, OS:RefEn) %>% data.table()
 
-hbil_ccsdt[, value := 2625.5 * value]                                                 # convert to kJ/mol
+hbil_ccsdt[, value := 2625.5 * value]                                                   # convert to kJ/mol
 hbil_mp2[, value := 2625.5 * value]  
 
-hbil_ccsdt <- spread(hbil_ccsdt, Component, value) %>% data.table()                    # widen by Component
+hbil_ccsdt <- spread(hbil_ccsdt, Component, value) %>% data.table()                     # widen by Component
 hbil_mp2 <- spread(hbil_mp2, Component, value) %>% data.table()
 
 # A-alone etc. not valid column names
@@ -140,5 +143,33 @@ And the errors, by basis set:
 print(hbil.srs.dt[, as.list(nomed.stats(ccsdt.cbs - srs.1)), by = .(Basis)])
 ```
 
+And the largest errors for SRS-MP2:
+```{r}
+hbil.srs.dt[abs(ccsdt.cbs - srs.1) > 3 & Basis == "tz"]
+hbil.srs.dt[abs(ccsdt.cbs - srs.1) > 3 & Basis == "qz"]
+```
 
+This isn't very encouraging. What if we fit new coefficients to the 42 HBILs, and see how they perform?
+```{r}
+hbil.srs.dt[, coef.simple.fn(.SD, x = "ccsdt.cbs", y = c("OS", "SS", "0")), by = .(Basis)] %>% print()
+```
+Hmm...the coefficients for OS are higher, and that of SS are lower, compared to the SRS coefficients (from S88 + IL174). But notice the errors do not decrease a lot. Max error for cc-pVTZ is now **just** below chemical accuracy, and the best performing basis set, cc-pVQZ, still has max error about 3 $\text{kJ mol}^{-1}$. However, except for cc-pVDZ, all max errors are now below 4.
+
+Here, we did not separate by ratio, as in SRS-MP2, because for most basis sets, the majority of systems have $\epsilon_{\Delta s} > 1$. But what if we did separate by ratio?
+```{r}
+hbil.srs.dt[r == "A", coef.simple.fn(.SD, x = "ccsdt.cbs", y = c("OS", "0")), by = .(Basis)]
+hbil.srs.dt[r == "B", coef.simple.fn(.SD, x = "ccsdt.cbs", y = c("OS", "SS", "0")), by = .(Basis)]
+```
+So...large errors still for "A" systems, which is where the majority of ion pairs lie. "B" systems have a much smaller number, so correspondingly smaller errors. Ignoring the double-$\zeta$ basis sets, cc-pVTZ has the largest max errors...and MAE...and SD. Not very encouraging :(
+
+
+### Comparing CP corrected MP2 against CCSD(T)/CBS
+
+```{r}
+hbil.mp2_cp <- merge(hbil.mp2_cbs
+                     , hbil.ccsdt_cbs[, c("Suite", "System", "ccsdt.cbs"), with = F]
+                     , by = c("Suite", "System"))
+hbil.mp2_cp[, as.list(nomed.stats(ccsdt.cbs - OS - SS)), by = .(Basis)] %>% print()
+```
+Looks like aug-cc-pVQZ is the best, even better than MP2/CBS.
 
