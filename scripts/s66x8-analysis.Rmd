@@ -50,8 +50,16 @@ s66x8_ccsdt[, Dist := as.numeric(sapply(Dist, strReverse))]
 s66x8_ccsdt[, System := as.factor(sapply(System, strReverse))]
 s66x8_ccsdt[, c("V1", "Rest", "reverzed") := NULL]
 
-
-
 ```
 
+Now to calculate CP and nonCP energies...but wait, I may have the CCSD(T)/CBS energies, but I don't have Hartree-Fock energies. So I cannot determine the correlation energies. 
+```{r}
+s66x8_mp2 <- gather(s66x8_mp2, En, value, OS, SS, RefEn)
+
+s66x8_mp2[, value := 2625.5 * value]            # convert to kJ/mol
+
+s66x8_mp2 <- spread(s66x8_mp2, Component, value) %>% data.table()
+
+s66x8_mp2[, nonCP := dimers - monomers_A - monomers_B]
+```
 
