@@ -13,12 +13,13 @@ require(stringr)
 
 source("~/GoogleDrive/srs-app/scripts/gen_func.r")
 ```
-
+Read in MP2 nmbers.
 ```{r, include=FALSE}
 s66x8_mp2 <- read.table(file = "~/GoogleDrive/srs-app/data/s66x8-mp2.edat"
            , header = TRUE, sep = "|", strip.white = TRUE) %>% data.table()
 ```
 
+Read in reference CCSD(T)/CBS values. Convert to kJ/mol and make sure names etc. are standardised.
 ```{r}
 s66x8_ccsdt <- read.table(file = "~/GoogleDrive/srs-app/data/s66x8_reference.txt"
            , header = FALSE, skip = 2) %>% data.table()
